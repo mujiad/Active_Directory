@@ -61,3 +61,13 @@ Each ticket was tested from the client as the affected user, then documented wit
 ![Account locked out](image/account-lockout.PNG)
 
 ![User logged in after lockout](image/user-logged-after-locked-out.png)
+
+### Ticket 2: New hire onboarding
+ 
+**Problem:** HR requested an account, Sales access and a home drive for a new employee.
+**Solution:** Created the user by copying a Sales teammate (inherits group membership), set job title and manager, and mapped an `H:` home folder to a hidden share.
+**Result:** New user signed in, forced to change the temporary password, and saw the `H:` drive.
+ 
+| Before | After |
+| --- | --- |
+| ![Ticket 2 before](screenshots/ticket-2-before.png) | ![Ticket 2 after](screenshots/ticket-2-after.png) |
