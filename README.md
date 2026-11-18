@@ -68,6 +68,14 @@ Each ticket was tested from the client as the affected user, then documented wit
 **Solution:** Created the user by copying a Sales teammate (inherits group membership), set job title and manager, and mapped an `H:` home folder to a hidden share.
 **Result:** New user signed in, forced to change the temporary password, and saw the `H:` drive.
  
-| Before | After |
-| --- | --- |
-| ![Ticket 2 before](screenshots/ticket-2-before.png) | ![Ticket 2 after](screenshots/ticket-2-after.png) |
+steps:
+1. create user(Peter Garcia)
+   (picture-ticket2 memeber-of)
+   sign in using the account and see no sharing folder
+   (pgarcia-before-sharing)
+3. create shareing folder (C:\share\Home) then go to propert-share-advance sharing-clicked the share  and name it Home$ - go permission then clicked everyone and clicked full control
+   (ticket2-share-home-permission-full-control)
+4. clik peter garcia account then go to profile then connect Home folder to \\AD-DC01\Home$\%username%
+(ticket2-connect)
+5. sign in again to the account and see the shared file
+   (pgarcia-after-sharing)
