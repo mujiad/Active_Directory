@@ -111,4 +111,4 @@ The `%username%` variable automatically creates or connects to a folder named fo
 
 Signed in again as Peter Garcia and verified that the home folder was available as the `H:` drive.
 
-![Peter Garcia home folder after configuration](image/pgarcia-after-sharing.png)
+![Peter Garcia home folder after configuration](image/pgarcia-after-sharing.png) 
