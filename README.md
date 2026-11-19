@@ -144,3 +144,9 @@ Added `DL_Sales_Read` to the Sales folder's security permissions and granted the
 Signed in as the HR user and verified that the Sales shared folder was accessible.
 
 ![HR user access granted](image/HR-can-access.png)
+
+### Ticket 4: Auto-map a drive with Group Policy
+ 
+**Problem:** Sales staff had to map the Sales folder manually.
+**Solution:** Created and linked a GPO to the Sales OU using a Drive Maps preference that maps `S:` to the Sales share.
+**Result:** Sales users received `S:` at sign-in; an IT user did not, confirming correct scoping.
