@@ -157,7 +157,7 @@ Signed in as the HR user and verified that the Sales shared folder was accessibl
 
 Created a GPO under the Sales OU and linked it to the OU.
 
-![GPO created under the Sales OU](image/Ticket%204/ticket4-create-gpo-under-sales.PNG)
+![GPO created under the Sales OU](<image/Ticket 4/ticket4-create-gpo-under-sales.PNG>)
 
 ### 2. Configure the Mapped Drive
 
@@ -165,56 +165,76 @@ Opened **User Configuration**, then **Preferences**, **Windows Settings**, and *
 
 Set the action to **Create**, entered `\\DC01\Sales` as the location, and selected `S:` as the drive letter. Enabled **Reconnect** so the drive would remap after each sign-in.
 
-![Mapped drive configured as S:](image/Ticket%204/ticket4-create-drive-map-use-S.PNG)
+![Mapped drive configured as S:](<image/Ticket 4/ticket4-create-drive-map-use-S.PNG>)
 
 ### 3. Verify the Mapped Drive
 
 Signed in as a Sales department user and verified that the `S:` drive appeared in File Explorer.
 
-![Sales user S: drive](image/Ticket%204/ticket4-S-drive-complete.png)
+![Sales user S: drive](<image/Ticket 4/ticket4-S-drive-complete.png>)
 
+## Ticket 5: Group Policy Not Applying
 
-### Ticket 5: Group Policy not applying
- 
-**Problem:** One Sales user did not receive the `S:` drive.
-**Solution:** Used the Group Policy Results Wizard to find the GPO was not applied because the account sat in the default Users container instead of the Sales OU. Moved the account to the correct OU.
-**Result:** Policy appeared under Applied GPOs and the drive mapped on next sign-in.
+**Problem:** Lena, a Sales user, did not receive the `S:` drive, even though she was a member of `GG_Sales`.
 
-1. user no S drive but part of GG_Sales group
-(ticket5-no-S-drive)(ticket5-add-user-not-0u)
+**Solution:** Used the Group Policy Results Wizard to determine that the GPO was not applying because Lena's account was in the default Users container rather than the Sales OU. Moved her account to the Sales OU. After the drive mapped, checked her group membership and the share permissions to resolve an initial access-denied issue.
 
-but notice that lena have different folder path than the other.
+**Result:** After refreshing the client's sign-in, Lena could access the mapped `S:` drive.
 
-Group Policy links to OUs, not to groups, so a user outside the Sales OU never receives it. 
-2. move Lena to the sales OU
-(ticket5-moved-to-ales)
-3. sign in the user again
-(ticket5-w-S-but-no-access)
-but notice that there are no access to the drive. thats because we initially add permission for only the GG_Sales and GL_Sales_Read only. we already add lena to GG_lases group but since we move lena, the path change so we need to add lena again to the group.
-(ticket5-add-len)
-restart the window client then and look for the drive access
-(ticket5-access-granted)(ticket5-inside-S-drive)
+### 1. Identify Why the Drive Was Missing
 
-### Ticket 6: Delegate password resets
- 
+Lena was a member of `GG_Sales`, but the `S:` drive was missing. Her account was in the default Users container rather than the Sales OU, so it was outside the scope of the GPO. Group Policy is linked to OUs, not security groups.
+
+![Lena's S: drive was missing](<image/Ticket 5/ticket5-no-S-drive.png>)
+
+![Lena's account was in the default Users container](<image/Ticket 5/ticket5-add-user-not-0u.PNG>)
+
+### 2. Move Lena to the Sales OU
+
+Moved Lena's account to the Sales OU so that it would be in the scope of the drive-mapping GPO.
+
+![Lena's account moved to the Sales OU](<image/Ticket 5/ticket5-moved-to-ales.PNG>)
+
+### 3. Verify the Drive and Resolve Access
+
+After signing in again, Lena received the `S:` drive but initially could not open it. Checked that Lena was included in the group granted access to the Sales share and that the share permissions were configured correctly.
+
+![S: drive appeared, but access was denied](<image/Ticket 5/ticket5-w-S-but-no-access.png>)
+
+![Lena's group membership was checked](<image/Ticket 5/ticket5-add-lena.PNG>)
+
+Restarted the client and signed in again to refresh the session. Lena could then open the `S:` drive and access its contents.
+
+![Lena could access the Sales share](<image/Ticket 5/ticket5-access-granted.png>)
+
+![Files visible inside the S: drive](<image/Ticket 5/ticket5-inside-S-drive.png>)
+
+## Ticket 6: Delegate Password Resets
+
 **Problem:** Helpdesk staff could not reset Sales passwords without a domain admin.
-**Solution:** Used the Delegate Control wizard on the Sales OU to grant `GG_Helpdesk` only "Reset user passwords" and "Read all user information".
-**Result:** Resets worked in Sales and were denied in HR, proving least privilege.
 
-### Ticket 7: Stricter passwords for IT staff
- 
+**Solution:** Used the Delegate Control wizard on the Sales OU to grant `GG_Helpdesk` only "Reset user passwords" and "Read all user information."
+
+**Result:** Password resets worked in Sales and were denied in HR, demonstrating least privilege.
+
+## Ticket 7: Stricter Passwords for IT Staff
+
 **Problem:** A security audit required longer passwords for accounts that can reset others.
-**Solution:** Created a Fine-Grained Password Policy (`PSO_Helpdesk`: 14 characters, 24 history, 60-day maximum age) in Active Directory Administrative Center and applied it to `GG_Helpdesk`.
-**Result:** Short passwords were rejected for helpdesk users, and Resultant Password Settings confirmed other users were unaffected.
 
-### Ticket 8: Employee offboarding
- 
-**Problem:** An employee left and access had to be removed while keeping data for 30 days.
+**Solution:** Created a Fine-Grained Password Policy (`PSO_Helpdesk`: 14 characters, 24 history, 60-day maximum age) in Active Directory Administrative Center and applied it to `GG_Helpdesk`.
+
+**Result:** Short passwords were rejected for helpdesk users, and Resultant Password Settings confirmed that other users were unaffected.
+
+## Ticket 8: Employee Offboarding
+
+**Problem:** An employee left, and access had to be removed while keeping data for 30 days.
+
 **Solution:** Disabled the account, reset the password, removed group memberships, recorded the ticket and deletion date in the description, and moved it to the `Disabled Accounts` OU.
+
 **Result:** Sign-in was blocked with the "account has been disabled" message.
 
 ## What I Learned
- 
+
 - Group Policy links to OUs, not groups, so where an account lives determines what it receives.
 - Granting access through groups instead of individuals keeps permissions manageable.
 - Delegation is safer than adding helpdesk staff to Domain Admins.
