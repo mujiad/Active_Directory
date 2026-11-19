@@ -150,3 +150,10 @@ Signed in as the HR user and verified that the Sales shared folder was accessibl
 **Problem:** Sales staff had to map the Sales folder manually.
 **Solution:** Created and linked a GPO to the Sales OU using a Drive Maps preference that maps `S:` to the Sales share.
 **Result:** Sales users received `S:` at sign-in; an IT user did not, confirming correct scoping.
+
+1. Create a GPO under Sales OU
+(ticket4-create-gpo-under-sales)
+2. Go to User Configuration, Preferences, Windows Settings, Drive Maps. Right-click the empty area and choose New, then Mapped Drive. Set Action to Create, Location to \\DC01\Sales, tick Reconnect, choose Use S:, and click OK.
+(ticket4-create-drive-map-use-S)
+3. log in to any sales department user and verify if S drive appear
+(ticket4-S-drive-complete)
