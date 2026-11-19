@@ -1,6 +1,6 @@
 # Active Directory Helpdesk Lab
 
-A hands-on home lab that simulates a real IT helpdesk. I built a small Active Directory environment for a fictional company (Contoso) and worked through eight realistic support tickets, solving each o[...]
+A hands-on home lab that simulates a real IT helpdesk. I built a small Active Directory environment for a fictional company (Contoso) and worked through eight realistic support tickets, solving each one to practice common helpdesk tasks.
 
 ## Lab Environment
 
@@ -111,18 +111,36 @@ The `%username%` variable automatically creates or connects to a folder named fo
 
 Signed in again as Peter Garcia and verified that the home folder was available as the `H:` drive.
 
-![Peter Garcia home folder after configuration](image/pgarcia-after-sharing.png) 
+![Peter Garcia home folder after configuration](image/pgarcia-after-sharing.png)
 
-Ticket 3: Shared folder access
+## Ticket 3: Shared Folder Access
 
-Problem: An HR user received "Access is denied" on the Sales share but needed read-only access. Solution: Created a domain local group DL_Sales_Read, added GG_HR to it, and granted Read & execute on the folder. No permissions were given to individual users. Result: User could open files but could not modify them.
+**Problem:** An HR user received an "Access is denied" error when attempting to open the Sales shared folder but needed read-only access.
 
-HR window
-(ticket3-cant-access)
+**Solution:** Created the `DL_Sales_Read` domain-local group, added `GG_HR` to the group, and granted the domain-local group read and execute permissions on the Sales folder.
 
-1 create DL_Sales_Read and add GG_HR to member so that hr can access the Sales folder.
-(ticket3-add-hr)
-2. Add DL_Sales_Read to Sales folder allowed group with read and execute permission only 
-(ticket3-add-Dl_Sales_Read)
-3.HR window after 
-(HR-can-access)
+**Result:** The HR user could access the Sales shared folder with read-only permissions.
+
+### Before
+
+The HR user could not access the Sales shared folder.
+
+![HR user access denied](image/ticket3-cant-access.png)
+
+### 1. Create the Domain-Local Group
+
+Created `DL_Sales_Read` and added `GG_HR` as a member so that users in the HR group could access the Sales folder.
+
+![DL_Sales_Read group membership](image/ticket3-add-hr.PNG)
+
+### 2. Grant Read and Execute Permissions
+
+Added `DL_Sales_Read` to the Sales folder's security permissions and granted the group **Read & execute** permissions only.
+
+![Sales folder permissions](image/ticket3-add-Dl_Sales_Read.PNG)
+
+### 3. Verify HR Access
+
+Signed in as the HR user and verified that the Sales shared folder was accessible.
+
+![HR user access granted](image/HR-can-access.png)
