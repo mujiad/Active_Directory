@@ -172,3 +172,49 @@ Set the action to **Create**, entered `\\DC01\Sales` as the location, and select
 Signed in as a Sales department user and verified that the `S:` drive appeared in File Explorer.
 
 ![Sales user S: drive](image/Ticket%204/ticket4-S-drive-complete.png)
+
+
+### Ticket 5: Group Policy not applying
+ 
+**Problem:** One Sales user did not receive the `S:` drive.
+**Solution:** Used the Group Policy Results Wizard to find the GPO was not applied because the account sat in the default Users container instead of the Sales OU. Moved the account to the correct OU.
+**Result:** Policy appeared under Applied GPOs and the drive mapped on next sign-in.
+
+1. user no S drive but part of GG_Sales group
+(ticket5-no-S-drive)(ticket5-add-user-not-0u)
+
+but notice that lena have different folder path than the other.
+
+Group Policy links to OUs, not to groups, so a user outside the Sales OU never receives it. 
+2. move Lena to the sales OU
+(ticket5-moved-to-ales)
+3. sign in the user again
+(ticket5-w-S-but-no-access)
+but notice that there are no access to the drive. thats because we initially add permission for only the GG_Sales and GL_Sales_Read only. we already add lena to GG_lases group but since we move lena, the path change so we need to add lena again to the group.
+(ticket5-access-granted)(ticket5-inside-S-drive)
+
+### Ticket 6: Delegate password resets
+ 
+**Problem:** Helpdesk staff could not reset Sales passwords without a domain admin.
+**Solution:** Used the Delegate Control wizard on the Sales OU to grant `GG_Helpdesk` only "Reset user passwords" and "Read all user information".
+**Result:** Resets worked in Sales and were denied in HR, proving least privilege.
+
+### Ticket 7: Stricter passwords for IT staff
+ 
+**Problem:** A security audit required longer passwords for accounts that can reset others.
+**Solution:** Created a Fine-Grained Password Policy (`PSO_Helpdesk`: 14 characters, 24 history, 60-day maximum age) in Active Directory Administrative Center and applied it to `GG_Helpdesk`.
+**Result:** Short passwords were rejected for helpdesk users, and Resultant Password Settings confirmed other users were unaffected.
+
+### Ticket 8: Employee offboarding
+ 
+**Problem:** An employee left and access had to be removed while keeping data for 30 days.
+**Solution:** Disabled the account, reset the password, removed group memberships, recorded the ticket and deletion date in the description, and moved it to the `Disabled Accounts` OU.
+**Result:** Sign-in was blocked with the "account has been disabled" message.
+
+## What I Learned
+ 
+- Group Policy links to OUs, not groups, so where an account lives determines what it receives.
+- Granting access through groups instead of individuals keeps permissions manageable.
+- Delegation is safer than adding helpdesk staff to Domain Admins.
+- Disable first and delete later when offboarding.
+- Always verify a fix as the affected user, and document it.
