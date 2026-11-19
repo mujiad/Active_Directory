@@ -112,3 +112,7 @@ The `%username%` variable automatically creates or connects to a folder named fo
 Signed in again as Peter Garcia and verified that the home folder was available as the `H:` drive.
 
 ![Peter Garcia home folder after configuration](image/pgarcia-after-sharing.png) 
+
+Ticket 3: Shared folder access
+
+Problem: An HR user received "Access is denied" on the Sales share but needed read-only access. Solution: Created a domain local group DL_Sales_Read, added GG_HR to it, and granted Read & execute on the folder. No permissions were given to individual users. Result: User could open files but could not modify them.
