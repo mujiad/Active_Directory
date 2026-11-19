@@ -191,6 +191,8 @@ Group Policy links to OUs, not to groups, so a user outside the Sales OU never r
 3. sign in the user again
 (ticket5-w-S-but-no-access)
 but notice that there are no access to the drive. thats because we initially add permission for only the GG_Sales and GL_Sales_Read only. we already add lena to GG_lases group but since we move lena, the path change so we need to add lena again to the group.
+(ticket5-add-len)
+restart the window client then and look for the drive access
 (ticket5-access-granted)(ticket5-inside-S-drive)
 
 ### Ticket 6: Delegate password resets
