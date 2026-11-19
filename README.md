@@ -116,3 +116,13 @@ Signed in again as Peter Garcia and verified that the home folder was available 
 Ticket 3: Shared folder access
 
 Problem: An HR user received "Access is denied" on the Sales share but needed read-only access. Solution: Created a domain local group DL_Sales_Read, added GG_HR to it, and granted Read & execute on the folder. No permissions were given to individual users. Result: User could open files but could not modify them.
+
+HR window
+(ticket3-cant-access)
+
+1 create DL_Sales_Read and add GG_HR to member so that hr can access the Sales folder.
+(ticket3-add-hr)
+2. Add DL_Sales_Read to Sales folder allowed group with read and execute permission only 
+(ticket3-add-Dl_Sales_Read)
+3.HR window after 
+(HR-can-access)
