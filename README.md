@@ -145,15 +145,30 @@ Signed in as the HR user and verified that the Sales shared folder was accessibl
 
 ![HR user access granted](image/HR-can-access.png)
 
-### Ticket 4: Auto-map a drive with Group Policy
- 
-**Problem:** Sales staff had to map the Sales folder manually.
-**Solution:** Created and linked a GPO to the Sales OU using a Drive Maps preference that maps `S:` to the Sales share.
-**Result:** Sales users received `S:` at sign-in; an IT user did not, confirming correct scoping.
+## Ticket 4: Automatically Map a Drive with Group Policy
 
-1. Create a GPO under Sales OU
-(ticket4-create-gpo-under-sales)
-2. Go to User Configuration, Preferences, Windows Settings, Drive Maps. Right-click the empty area and choose New, then Mapped Drive. Set Action to Create, Location to \\DC01\Sales, tick Reconnect, choose Use S:, and click OK.
-(ticket4-create-drive-map-use-S)
-3. log in to any sales department user and verify if S drive appear
-(ticket4-S-drive-complete)
+**Problem:** Sales staff had to map the Sales shared folder manually.
+
+**Solution:** Created and linked a Group Policy Object (GPO) to the Sales organizational unit (OU) using a Drive Maps preference that mapped `S:` to the Sales shared folder.
+
+**Result:** Sales users received the `S:` drive when they signed in, while users outside the Sales OU did not receive it, confirming that the policy was correctly scoped.
+
+### 1. Create and Link the GPO
+
+Created a GPO under the Sales OU and linked it to the OU.
+
+![GPO created under the Sales OU](image/Ticket%204/ticket4-create-gpo-under-sales.PNG)
+
+### 2. Configure the Mapped Drive
+
+Opened **User Configuration**, then **Preferences**, **Windows Settings**, and **Drive Maps**. Right-clicked the empty area, selected **New**, and chose **Mapped Drive**.
+
+Set the action to **Create**, entered `\\DC01\Sales` as the location, and selected `S:` as the drive letter. Enabled **Reconnect** so the drive would remap after each sign-in.
+
+![Mapped drive configured as S:](image/Ticket%204/ticket4-create-drive-map-use-S.PNG)
+
+### 3. Verify the Mapped Drive
+
+Signed in as a Sales department user and verified that the `S:` drive appeared in File Explorer.
+
+![Sales user S: drive](image/Ticket%204/ticket4-S-drive-complete.png)
