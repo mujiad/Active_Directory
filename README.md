@@ -278,7 +278,19 @@ The password met the policy requirements and the password reset succeeded.
 **Solution:** Disabled the account, reset the password, removed group memberships, recorded the ticket and deletion date in the description, and moved it to the `Disabled Accounts` OU.
 
 **Result:** Sign-in was blocked with the "account has been disabled" message.
-
+1. disable a user
+    (ticket8-dissabled-account)
+2. reset user password
+   (ticket8-reset-pass)
+3. double clicked user and remove them form any group
+(ticket8-remove-member)
+4. in the user general description add "Disabled 2026-11-15, Ticket 1008, delete after 2026-12-15"
+   (ticket8-add-description)
+4.moved out the disabled user outside of user group to disabled OU
+(ticket8-move-disabled-OU)
+6. sign in as the disabled user
+(ticket8-log-in)
+notice how the user cant login
 ## What I Learned
 
 - Group Policy links to OUs, not groups, so where an account lives determines what it receives.
