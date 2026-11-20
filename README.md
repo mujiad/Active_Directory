@@ -243,6 +243,18 @@ Confirmed that `GG_Helpdesk` had permission to reset passwords for users in the 
 
 **Result:** Short passwords were rejected for helpdesk users, and Resultant Password Settings confirmed that other users were unaffected.
 
+1. go to active directory administrative center > corp.local > system > password settings container then clicked new and set your preffered setting
+   (ticket7-administrative center)
+
+   in the image i applied it to helpdesk users but you can apply it any any user or group you want.
+3. go to user and computer then reset the user password
+   (ticket7-set-char-8)
+   the image shows 8 character only but we set it to 14 witch result to failed attempt
+   (ticket7-pass-not-met)
+4. now set the password to 14 character
+ (ticket7-set-char-14)(ticket7-pass-success)
+ now you can see that the password reset is successfull
+
 ## Ticket 8: Employee Offboarding
 
 **Problem:** An employee left, and access had to be removed while keeping data for 30 days.
