@@ -219,8 +219,6 @@ Restarted the client and signed in again to refresh the session. Lena could then
 
 1. Right clicked the Sales OU then delegate control then add GG_helpdesk
    (ticket6-delegate-contorl)
-2. on client windows sign in as local administrator then add RSAT: Active Directory Domain Services and Lightweight Directory Services Tools if none.
-(ticket6-add-active-D)
 3. Confirm that GG_Helpdesk have permission to rest password
 (ticket6-permission-confirmed)
 
