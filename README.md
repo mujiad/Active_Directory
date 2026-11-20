@@ -278,19 +278,31 @@ The password met the policy requirements and the password reset succeeded.
 **Solution:** Disabled the account, reset the password, removed group memberships, recorded the ticket and deletion date in the description, and moved it to the `Disabled Accounts` OU.
 
 **Result:** Sign-in was blocked with the "account has been disabled" message.
-1. disable a user
-    (ticket8-dissabled-account)
-2. reset user password
-   (ticket8-reset-pass)
-3. double clicked user and remove them form any group
-(ticket8-remove-member)
-4. in the user general description add "Disabled 2026-11-15, Ticket 1008, delete after 2026-12-15"
-   (ticket8-add-description)
-4.moved out the disabled user outside of user group to disabled OU
-(ticket8-move-disabled-OU)
-6. sign in as the disabled user
-(ticket8-log-in)
-notice how the user cant login
+
+1. Disable the user.
+
+   ![ticket8-dissabled-account.PNG](<image/ticket 8/ticket8-dissabled-account.PNG>)
+
+2. Reset the user password.
+
+   ![ticket8-reset-pass.PNG](<image/ticket 8/ticket8-reset-pass.PNG>)
+
+3. Double-click the user and remove them from all groups.
+
+   ![ticket8-remove-member.PNG](<image/ticket 8/ticket8-remove-member.PNG>)
+
+4. In the user's General description, add "Disabled 2026-11-15, Ticket 1008, delete after 2026-12-15".
+
+   ![ticket8-add-description.PNG](<image/ticket 8/ticket8-add-description.PNG>)
+
+5. Move the disabled user from the Users container to the Disabled Accounts OU.
+
+   ![ticket8-move-disabled-OU.PNG](<image/ticket 8/ticket8-move-disabled-OU.PNG>)
+
+6. Sign in as the disabled user and verify that login is blocked.
+
+   ![ticket8-log-in.png](<image/ticket 8/ticket8-log-in.png>)
+
 ## What I Learned
 
 - Group Policy links to OUs, not groups, so where an account lives determines what it receives.
