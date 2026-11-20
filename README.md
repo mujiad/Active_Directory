@@ -24,7 +24,7 @@ corp.local
     └── Disabled Accounts
 ```
 
-Security groups: `GG_Sales`, `GG_HR`, and `GG_Helpdesk` are global groups; `DL_Sales_Read` is a domain-local group.
+Security groups: `GG_Sales`, `GG_HR`, and `GG_Helpdesk` are global groups; `DL_Sales_Read` is a domain-local group. 
 
 ## Skills Demonstrated
 
