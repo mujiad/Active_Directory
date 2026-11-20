@@ -1,6 +1,6 @@
 # Active Directory Helpdesk Lab
 
-A hands-on home lab that simulates a real IT helpdesk. I built a small Active Directory environment for a fictional company (Contoso) and worked through eight realistic support tickets, solving each one to practice common helpdesk tasks.
+A hands-on home lab that simulates a real IT helpdesk. I built a small Active Directory environment for a fictional company (Contoso) and worked through eight realistic support tickets, solving each one using the tools and techniques an IT support technician would use.
 
 ## Lab Environment
 
@@ -24,7 +24,7 @@ corp.local
     └── Disabled Accounts
 ```
 
-Security groups: `GG_Sales`, `GG_HR`, and `GG_Helpdesk` are global groups; `DL_Sales_Read` is a domain-local group. 
+Security groups: `GG_Sales`, `GG_HR`, and `GG_Helpdesk` are global groups; `DL_Sales_Read` is a domain-local group.
 
 ## Skills Demonstrated
 
@@ -177,13 +177,13 @@ Signed in as a Sales department user and verified that the `S:` drive appeared i
 
 **Problem:** Lena, a Sales user, did not receive the `S:` drive, even though she was a member of `GG_Sales`.
 
-**Solution:** Used the Group Policy Results Wizard to determine that the GPO was not applying because Lena's account was in the default Users container rather than the Sales OU. Moved her account to the Sales OU. After the drive was mapped, checked her group membership and the share permissions to resolve an initial access-denied issue.
+**Solution:** Used the Group Policy Results Wizard to determine that the GPO was not applying because Lena's account was in the default Users container rather than the Sales OU. Moved her account to the Sales OU and verified the drive-mapping policy.
 
 **Result:** After refreshing the client's sign-in, Lena could access the mapped `S:` drive.
 
 ### 1. Identify Why the Drive Was Missing
 
-Lena was a member of `GG_Sales`, but the `S:` drive was missing. Her account was in the default Users container rather than the Sales OU, so it was outside the scope of the GPO. Group Policy is linked to OUs, not security groups.
+Lena was a member of `GG_Sales`, but the `S:` drive was missing. Her account was in the default Users container rather than the Sales OU, so it was outside the scope of the GPO. Group Policy is linked to OUs rather than user groups.
 
 ![Lena's S: drive was missing](<image/Ticket 5/ticket5-no-S-drive.png>)
 
@@ -197,7 +197,7 @@ Moved Lena's account to the Sales OU so that it would be in the scope of the dri
 
 ### 3. Verify the Drive and Resolve Access
 
-After signing in again, Lena received the `S:` drive but initially could not open it. Checked that Lena was included in the group granted access to the Sales share and that the share permissions were configured correctly.
+After signing in again, Lena received the `S:` drive but initially could not open it. Checked that Lena was included in the group granted access to the Sales share and that the share permissions allowed access.
 
 ![S: drive appeared, but access was denied](<image/Ticket 5/ticket5-w-S-but-no-access.png>)
 
@@ -243,17 +243,33 @@ Confirmed that `GG_Helpdesk` had permission to reset passwords for users in the 
 
 **Result:** Short passwords were rejected for helpdesk users, and Resultant Password Settings confirmed that other users were unaffected.
 
-1. go to active directory administrative center > corp.local > system > password settings container then clicked new and set your preffered setting
-   (ticket7-administrative center)
+### 1. Create the Fine-Grained Password Policy
 
-   in the image i applied it to helpdesk users but you can apply it any any user or group you want.
-3. go to user and computer then reset the user password
-   (ticket7-set-char-8)
-   the image shows 8 character only but we set it to 14 witch result to failed attempt
-   (ticket7-pass-not-met)
-4. now set the password to 14 character
- (ticket7-set-char-14)(ticket7-pass-success)
- now you can see that the password reset is successfull
+In Active Directory Administrative Center, navigated to **corp.local > System > Password Settings Container**. Selected **New**, then set the preferred password settings.
+
+The policy was applied to helpdesk users, but it can also be applied to any user or group.
+
+![Fine-Grained Password Policy configuration](<image/ticket 7/ticket7-administrative center.PNG>)
+
+### 2. Test an Eight-Character Password
+
+In Active Directory Users and Computers, reset the test user's password using eight characters.
+
+![Eight-character password entered](<image/ticket 7/ticket7-set-char-8.PNG>)
+
+The password did not meet the 14-character requirement and was rejected.
+
+![Password requirement not met](<image/ticket 7/ticket7-pass-not-met.PNG>)
+
+### 3. Test a 14-Character Password
+
+Reset the password again with 14 characters.
+
+![14-character password entered](<image/ticket 7/ticket7-set-char-14.PNG>)
+
+The password met the policy requirements and the password reset succeeded.
+
+![Password reset successful](<image/ticket 7/ticket7-pass-success.PNG>)
 
 ## Ticket 8: Employee Offboarding
 
