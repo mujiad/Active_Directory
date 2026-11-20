@@ -177,7 +177,7 @@ Signed in as a Sales department user and verified that the `S:` drive appeared i
 
 **Problem:** Lena, a Sales user, did not receive the `S:` drive, even though she was a member of `GG_Sales`.
 
-**Solution:** Used the Group Policy Results Wizard to determine that the GPO was not applying because Lena's account was in the default Users container rather than the Sales OU. Moved her account to the Sales OU. After the drive mapped, checked her group membership and the share permissions to resolve an initial access-denied issue.
+**Solution:** Used the Group Policy Results Wizard to determine that the GPO was not applying because Lena's account was in the default Users container rather than the Sales OU. Moved her account to the Sales OU. After the drive was mapped, checked her group membership and the share permissions to resolve an initial access-denied issue.
 
 **Result:** After refreshing the client's sign-in, Lena could access the mapped `S:` drive.
 
@@ -211,16 +211,29 @@ Restarted the client and signed in again to refresh the session. Lena could then
 
 ## Ticket 6: Delegate Password Resets
 
-**Problem:** Helpdesk staff could not reset Sales passwords without a domain admin.
+**Problem:** Helpdesk staff could not reset Sales users' passwords without assistance from a domain administrator.
 
-**Solution:** Used the Delegate Control wizard on the Sales OU to grant `GG_Helpdesk` only "Reset user passwords" and "Read all user information."
+**Solution:** Used the Delegate Control wizard on the Sales OU to grant `GG_Helpdesk` only the **Reset user passwords** and **Read all user information** permissions.
 
-**Result:** Password resets worked in Sales and were denied in HR, demonstrating least privilege.
+**Result:** Helpdesk password resets worked for users in Sales and were denied for users in HR, demonstrating least privilege.
 
-1. Right clicked the Sales OU then delegate control then add GG_helpdesk
-   (ticket6-delegate-contorl)
-3. Confirm that GG_Helpdesk have permission to rest password
-(ticket6-permission-confirmed)
+### 1. Open the Delegation of Control Wizard
+
+Right-clicked the Sales OU, selected **Delegate Control**, and added `GG_Helpdesk` to the wizard.
+
+![Added GG_Helpdesk in the Delegation of Control wizard](<image/ticket 6/ticket6-delegate-contorl.PNG>)
+
+### 2. Select the Tasks to Delegate
+
+Selected the task to reset user passwords, along with permission to read all user information.
+
+![Selected the password-reset task to delegate](<image/ticket 6/ticket6-task-to-delegate.PNG>)
+
+### 3. Confirm the Delegated Permissions
+
+Confirmed that `GG_Helpdesk` had permission to reset passwords for users in the Sales OU.
+
+![Confirmed the delegated password-reset permissions](<image/ticket 6/ticket6-permission-confirmed.PNG>)
 
 ## Ticket 7: Stricter Passwords for IT Staff
 
