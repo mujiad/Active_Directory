@@ -1,17 +1,36 @@
 # Active Directory Helpdesk Lab
 
-A hands-on home lab that simulates a real IT helpdesk. I built a small Active Directory environment for a fictional company (Contoso) and worked through eight realistic support tickets, solving each one using the tools and techniques an IT support technician would use.
+I wanted to learn Active Directory the way an IT support technician actually meets it: through tickets. So I built a small domain for a made-up company called Contoso, then worked through eight realistic helpdesk tickets, solving each one with the Windows Server graphical tools and testing every fix from a domain-joined client as the affected user.
+
+## Quick Navigation
+
+Click any link to jump straight to that section.
+
+| # | Ticket | What I fixed |
+| --- | --- | --- |
+| 1 | [Locked-Out User](#ticket-1-locked-out-user) | Unlocked an account and reset its password |
+| 2 | [New Hire Onboarding](#ticket-2-new-hire-onboarding) | Created a user with group access and a personal home drive |
+| 3 | [Shared Folder Access](#ticket-3-shared-folder-access) | Gave HR read-only access to a Sales folder |
+| 4 | [Automatically Map a Drive](#ticket-4-automatically-map-a-drive-with-group-policy) | Delivered a network drive to Sales with Group Policy |
+| 5 | [Group Policy Not Applying](#ticket-5-group-policy-not-applying) | Found why one user never got the drive |
+| 6 | [Delegate Password Resets](#ticket-6-delegate-password-resets) | Let the helpdesk reset passwords, and nothing more |
+| 7 | [Stricter Passwords for IT Staff](#ticket-7-stricter-passwords-for-it-staff) | Enforced longer passwords for one group |
+| 8 | [Employee Offboarding](#ticket-8-employee-offboarding) | Shut off a leaver's access safely |
+
+Also on this page: [Lab Environment](#lab-environment) · [Skills Demonstrated](#skills-demonstrated) · [What I Learned](#what-i-learned)
+
+---
 
 ## Lab Environment
 
 | Component | Details |
 | --- | --- |
 | Domain | `corp.local` |
-| Domain controller | `DC01` (Windows Server, Desktop Experience) |
+| Domain controller | `AD-DC01` (Windows Server, Desktop Experience) |
 | Client | `WIN-CLIENT` (Windows, domain-joined) |
 | Tools used | Active Directory Users and Computers, Group Policy Management, Active Directory Administrative Center, File Explorer, RSAT |
 
-### Directory Structure
+I organized Contoso into departments so every ticket had something realistic to act on:
 
 ```text
 corp.local
@@ -24,7 +43,9 @@ corp.local
     └── Disabled Accounts
 ```
 
-Security groups: `GG_Sales`, `GG_HR`, and `GG_Helpdesk` are global groups; `DL_Sales_Read` is a domain-local group.
+For access control I created `GG_Sales`, `GG_HR` and `GG_Helpdesk` as global groups, plus `DL_Sales_Read` as a domain-local group.
+
+[↑ Back to contents](#quick-navigation)
 
 ## Skills Demonstrated
 
@@ -35,278 +56,263 @@ Security groups: `GG_Sales`, `GG_HR`, and `GG_Helpdesk` are global groups; `DL_S
 - Fine-grained password policies
 - Ticket documentation and verification
 
-## Tickets
+[↑ Back to contents](#quick-navigation)
 
-Each ticket was tested from the client as the affected user and documented with before-and-after screenshots.
+---
 
 ## Ticket 1: Locked-Out User
 
-**Problem:** A Sales user was locked out after multiple failed sign-in attempts.
+**The ticket:** A Sales user was locked out after too many failed sign-in attempts.
 
-**Solution:** Configured an account lockout policy, unlocked the account, and forced a password reset in Active Directory Users and Computers.
+I started by checking the account in Active Directory Users and Computers, which showed it healthy and not locked.
 
-**Result:** The user signed in and was prompted to create a new password.
+![User details in Active Directory](image/AD-user-details.PNG)
 
-### Before
-
-![User details](image/AD-user-details.PNG)
+A fresh domain has no lockout rule, so I created one in the Account Lockout Policy first, which let me reproduce the problem the way a real user would hit it.
 
 ![Account lockout policy](image/lockout-policy.PNG)
 
 ![Account not locked out](image/account-not-lockedout.PNG)
 
+Then I went to the client and signed in with the wrong password until Windows turned me away.
+
 ![User signing in](image/user-signing-in.png)
 
-### After
+![Client showing the account is locked out](image/user-locked-out.png)
 
-![User locked out](image/user-locked-out.png)
+Back on the server, the account now showed as locked.
 
-![Account locked out](image/account-lockout.PNG)
+![Account locked out in Active Directory](image/account-lockout.PNG)
 
-![User logged in after lockout](image/user-logged-after-locked-out.png)
+I unlocked it and reset the password, forcing a change at the next sign-in. When the user tried again, Windows asked for a new password and let them in.
+
+![User logged in after the lockout](image/user-logged-after-locked-out.png)
+
+**Result:** The user was back at work and set a new password of their own.
+
+[↑ Back to contents](#quick-navigation)
+
+---
 
 ## Ticket 2: New Hire Onboarding
 
-**Problem:** HR requested a new user account, Sales access, and a home drive for a new employee.
+**The ticket:** HR asked for a new account for Peter Garcia, with Sales access and a home drive.
 
-**Solution:** Created the user by copying a Sales employee to inherit the appropriate group memberships, configured the job title and manager, and mapped an `H:` home drive to a hidden share.
+Rather than build the account from nothing, I copied an existing Sales employee in Active Directory Users and Computers. That way Peter inherited the Sales group memberships straight away, instead of me chasing each one down.
 
-**Result:** The new user signed in, was required to change the temporary password, and could access the `H:` drive.
+![Peter Garcia's group membership](image/ticket2-member-of.PNG)
 
-### 1. Create the User Account
+Before giving him a home folder, I signed in as Peter on the client to see his starting point. There was no home drive.
 
-Created a user account for Peter Garcia in Active Directory Users and Computers by copying an existing Sales employee. This copied account inherited the Sales team memberships.
+![Peter Garcia's client before the home folder](image/pgarcia-before-sharing.png)
 
-![Peter Garcia account membership](image/ticket2-member-of.PNG)
+Next I set up the place the home folders would live. On the domain controller I created `C:\Share\Home`, opened its sharing settings and shared it as `Home$`. The `$` makes it a hidden share, so it doesn't show up when users browse the server.
 
-Next, signed in to the client as Peter Garcia. At this stage, the home folder was not available.
+![Advanced Sharing for the Home folder](image/ticket2-share-home.PNG)
 
-![Peter Garcia home folder before configuration](image/pgarcia-before-sharing.png)
-
-### 2. Create the Home Folder Share
-
-Created the home folder directory at `C:\Share\Home` on the domain controller.
-
-Opened the folder properties, selected **Sharing**, and enabled **Advanced Sharing**. Named the share `Home$` to create a hidden share.
-
-![Home folder advanced sharing configuration](image/ticket2-share-home.PNG)
-
-Then opened **Permissions** and granted the appropriate access to the required users.
-
-For this lab, the Everyone group was granted Full Control. In a production environment, permissions should normally be restricted to authorized users or groups.
+For the share permissions I gave Everyone Full Control. That is fine for a lab, but in production I would restrict it to the people who need it.
 
 ![Home share permissions](image/ticket2-share-home-permission-full-control.PNG)
 
-### 3. Configure the User's Home Folder
-
-Opened Peter Garcia's account properties, selected the **Profile** tab, and mapped a home folder to the hidden share:
+The last piece was Peter's own account. On his Profile tab I pointed his home folder at:
 
 `\\AD-DC01\Home$\%username%`
 
-The `%username%` variable automatically creates or connects to a folder named for the signed-in user.
+The `%username%` part is what makes this work for everyone. Windows replaces it with the logon name of whoever the account belongs to, so Peter gets `...\Home\pgarcia`, and the same path would give the next hire a folder of their own.
 
 ![Home folder profile configuration](image/ticket2-connect.PNG)
 
-### 4. Verify the Home Drive
+I signed in as Peter again and his `H:` drive was there, pointing at his private folder.
 
-Signed in again as Peter Garcia and verified that the home folder was available as the `H:` drive.
+![Peter Garcia's H: drive after configuration](image/pgarcia-after-sharing.png)
 
-![Peter Garcia home folder after configuration](image/pgarcia-after-sharing.png)
+**Result:** Peter changed his temporary password at first sign-in and had his own `H:` drive from day one.
+
+[↑ Back to contents](#quick-navigation)
+
+---
 
 ## Ticket 3: Shared Folder Access
 
-**Problem:** An HR user received an "Access is denied" error when attempting to open the Sales shared folder but needed read-only access.
+**The ticket:** A user in HR was getting "Access is denied" on the Sales folder, but they only needed to read what was in it.
 
-**Solution:** Created the `DL_Sales_Read` domain-local group, added `GG_HR` to the group, and granted the domain-local group read and execute permissions on the Sales folder.
+I first confirmed the complaint by signing in as the HR user and trying to open the folder. It was denied, as reported.
 
-**Result:** The HR user could access the Sales shared folder with read-only permissions.
+![HR user denied access](image/ticket3-cant-access.png)
 
-### Before
-
-The HR user could not access the Sales shared folder.
-
-![HR user access denied](image/ticket3-cant-access.png)
-
-### 1. Create the Domain-Local Group
-
-Created `DL_Sales_Read` and added `GG_HR` as a member so that users in the HR group could access the Sales folder.
+I didn't want to give the HR user permission directly, because permissions tied to individuals become impossible to manage. Instead I followed the AGDLP approach. I created a domain-local group called `DL_Sales_Read` and made the HR global group, `GG_HR`, a member of it.
 
 ![DL_Sales_Read group membership](image/ticket3-add-hr.PNG)
 
-### 2. Grant Read and Execute Permissions
-
-Added `DL_Sales_Read` to the Sales folder's security permissions and granted the group **Read & execute** permissions only.
+Then on the Sales folder's Security tab I added `DL_Sales_Read` and gave it **Read & execute** only, with no write access.
 
 ![Sales folder permissions](image/ticket3-add-Dl_Sales_Read.PNG)
 
-### 3. Verify HR Access
+I signed in as the HR user again and the folder opened.
 
-Signed in as the HR user and verified that the Sales shared folder was accessible.
+![HR user can now access the folder](image/HR-can-access.png)
 
-![HR user access granted](image/HR-can-access.png)
+**Result:** HR could read the Sales files but could not change them, and no permission was given to any individual.
+
+[↑ Back to contents](#quick-navigation)
+
+---
 
 ## Ticket 4: Automatically Map a Drive with Group Policy
 
-**Problem:** Sales staff had to map the Sales shared folder manually.
+**The ticket:** Sales staff were mapping the Sales folder by hand, and wanted it to simply be there.
 
-**Solution:** Created and linked a Group Policy Object (GPO) to the Sales organizational unit (OU) using a Drive Maps preference that mapped `S:` to the Sales shared folder.
-
-**Result:** Sales users received the `S:` drive when they signed in, while users outside the Sales OU did not receive it, confirming that the policy was correctly scoped.
-
-### 1. Create and Link the GPO
-
-Created a GPO under the Sales OU and linked it to the OU.
+This was my first real Group Policy ticket. I created a GPO and linked it to the Sales OU, so it would apply only to people who live there.
 
 ![GPO created under the Sales OU](<image/Ticket 4/ticket4-create-gpo-under-sales.PNG>)
 
-### 2. Configure the Mapped Drive
-
-Opened **User Configuration**, then **Preferences**, **Windows Settings**, and **Drive Maps**. Right-clicked the empty area, selected **New**, and chose **Mapped Drive**.
-
-Set the action to **Create**, entered `\\DC01\Sales` as the location, and selected `S:` as the drive letter. Enabled **Reconnect** so the drive would remap after each sign-in.
+Inside the GPO I went to User Configuration, Preferences, Windows Settings, then Drive Maps, and created a new mapped drive. I set the action to **Create**, pointed it at the Sales share, chose `S:` as the letter, and ticked **Reconnect** so it would come back at every sign-in.
 
 ![Mapped drive configured as S:](<image/Ticket 4/ticket4-create-drive-map-use-S.PNG>)
 
-### 3. Verify the Mapped Drive
+Then I signed in as a Sales user and checked This PC. The `S:` drive was already there.
 
-Signed in as a Sales department user and verified that the `S:` drive appeared in File Explorer.
+![Sales user with the S: drive](<image/Ticket 4/ticket4-S-drive-complete.png>)
 
-![Sales user S: drive](<image/Ticket 4/ticket4-S-drive-complete.png>)
+**Result:** Sales users got `S:` at sign-in, and users outside the Sales OU did not, which showed the policy was scoped correctly.
+
+[↑ Back to contents](#quick-navigation)
+
+---
 
 ## Ticket 5: Group Policy Not Applying
 
-**Problem:** Lena, a Sales user, did not receive the `S:` drive, even though she was a member of `GG_Sales`.
+**The ticket:** Lena, a Sales user, did not get the `S:` drive, even though she was in `GG_Sales`.
 
-**Solution:** Used the Group Policy Results Wizard to determine that the GPO was not applying because Lena's account was in the default Users container rather than the Sales OU. Moved her account to the Sales OU and verified the drive-mapping policy.
+This one taught me the most. Lena was in the right group, so on paper she should have had the drive. But Group Policy attaches to OUs, not to groups, so being in `GG_Sales` was never going to be enough. She had no drive.
 
-**Result:** After refreshing the client's sign-in, Lena could access the mapped `S:` drive.
+![Lena's missing S: drive](<image/Ticket 5/ticket5-no-S-drive.png>)
 
-### 1. Identify Why the Drive Was Missing
+I checked where her account actually lived. When I created her, I had added her to the default Users container instead of the Sales OU, so the GPO never reached her.
 
-Lena was a member of `GG_Sales`, but the `S:` drive was missing. Her account was in the default Users container rather than the Sales OU, so it was outside the scope of the GPO. Group Policy is linked to OUs rather than user groups.
+![Lena's account in the default Users container](<image/Ticket 5/ticket5-add-user-not-0u.PNG>)
 
-![Lena's S: drive was missing](<image/Ticket 5/ticket5-no-S-drive.png>)
-
-![Lena's account was in the default Users container](<image/Ticket 5/ticket5-add-user-not-0u.PNG>)
-
-### 2. Move Lena to the Sales OU
-
-Moved Lena's account to the Sales OU so that it would be in the scope of the drive-mapping GPO.
+I moved her account into the Sales OU.
 
 ![Lena's account moved to the Sales OU](<image/Ticket 5/ticket5-moved-to-ales.PNG>)
 
-### 3. Verify the Drive and Resolve Access
-
-After signing in again, Lena received the `S:` drive but initially could not open it. Checked that Lena was included in the group granted access to the Sales share and that the share permissions allowed access.
+After she signed in again the drive appeared, but when she tried to open it she was refused. So the fix had exposed a second problem, and I had to work out whether it was a policy or a permission issue.
 
 ![S: drive appeared, but access was denied](<image/Ticket 5/ticket5-w-S-but-no-access.png>)
 
-![Lena's group membership was checked](<image/Ticket 5/ticket5-add-lena.PNG>)
+I checked her group membership and the share permissions. She was in the group that had access, and the share allowed it.
 
-Restarted the client and signed in again to refresh the session. Lena could then open the `S:` drive and access its contents.
+![Checking Lena's group membership](<image/Ticket 5/ticket5-add-lena.PNG>)
 
-![Lena could access the Sales share](<image/Ticket 5/ticket5-access-granted.png>)
+The missing piece was her session. Group membership is read when someone signs in, so her old session didn't know about it. I restarted the client and signed in again, and the drive opened.
 
-![Files visible inside the S: drive](<image/Ticket 5/ticket5-inside-S-drive.png>)
+![Lena can access the Sales share](<image/Ticket 5/ticket5-access-granted.png>)
+
+![Files inside the S: drive](<image/Ticket 5/ticket5-inside-S-drive.png>)
+
+**Result:** Lena had a working `S:` drive. Two lessons came out of it: where an account lives decides which policies it gets, and a change to someone's groups only takes effect after a fresh sign-in.
+
+[↑ Back to contents](#quick-navigation)
+
+---
 
 ## Ticket 6: Delegate Password Resets
 
-**Problem:** Helpdesk staff could not reset Sales users' passwords without assistance from a domain administrator.
+**The ticket:** The helpdesk couldn't reset Sales users' passwords without asking a domain administrator.
 
-**Solution:** Used the Delegate Control wizard on the Sales OU to grant `GG_Helpdesk` only the **Reset user passwords** and **Read all user information** permissions.
+The easy fix would have been to make helpdesk staff domain admins, but that would hand them far more power than the job needs. I wanted them to do one thing in one place.
 
-**Result:** Helpdesk password resets worked for users in Sales and were denied for users in HR, demonstrating least privilege.
+I right-clicked the Sales OU, chose **Delegate Control**, and added the `GG_Helpdesk` group. I delegated to the group rather than to a person, so a future helpdesk hire only needs to be added to it.
 
-### 1. Open the Delegation of Control Wizard
+![Adding GG_Helpdesk in the Delegation of Control wizard](<image/ticket 6/ticket6-delegate-contorl.PNG>)
 
-Right-clicked the Sales OU, selected **Delegate Control**, and added `GG_Helpdesk` to the wizard.
+From the list of tasks, I picked only the permission to reset user passwords, along with the permission to read user information.
 
-![Added GG_Helpdesk in the Delegation of Control wizard](<image/ticket 6/ticket6-delegate-contorl.PNG>)
+![Selecting the password-reset task to delegate](<image/ticket 6/ticket6-task-to-delegate.PNG>)
 
-### 2. Select the Tasks to Delegate
+Afterwards I checked the Sales OU's permissions and confirmed `GG_Helpdesk` had exactly that access.
 
-Selected the task to reset user passwords, along with permission to read all user information.
+![Delegated password-reset permission confirmed](<image/ticket 6/ticket6-permission-confirmed.PNG>)
 
-![Selected the password-reset task to delegate](<image/ticket 6/ticket6-task-to-delegate.PNG>)
+**Result:** The helpdesk group holds just the permission to reset passwords in the Sales OU, nothing broader.
 
-### 3. Confirm the Delegated Permissions
+[↑ Back to contents](#quick-navigation)
 
-Confirmed that `GG_Helpdesk` had permission to reset passwords for users in the Sales OU.
-
-![Confirmed the delegated password-reset permissions](<image/ticket 6/ticket6-permission-confirmed.PNG>)
+---
 
 ## Ticket 7: Stricter Passwords for IT Staff
 
-**Problem:** A security audit required longer passwords for accounts that can reset others.
+**The ticket:** A security audit pointed out that the accounts able to reset other people's passwords followed the same weak password rule as everyone else.
 
-**Solution:** Created a Fine-Grained Password Policy (`PSO_Helpdesk`: 14 characters, 24 history, 60-day maximum age) in Active Directory Administrative Center and applied it to `GG_Helpdesk`.
-
-**Result:** Short passwords were rejected for helpdesk users, and Resultant Password Settings confirmed that other users were unaffected.
-
-### 1. Create the Fine-Grained Password Policy
-
-In Active Directory Administrative Center, navigated to **corp.local > System > Password Settings Container**. Selected **New**, then set the preferred password settings.
-
-The policy was applied to helpdesk users, but it can also be applied to any user or group.
+Changing the domain-wide policy would have affected every user, so I used a Fine-Grained Password Policy instead. In Active Directory Administrative Center I went to `corp.local`, then System, then Password Settings Container, and created `PSO_Helpdesk`: a 14-character minimum, 24 passwords remembered, and a 60-day maximum age. I applied it to `GG_Helpdesk` only, though the same approach can target any user or group.
 
 ![Fine-Grained Password Policy configuration](<image/ticket 7/ticket7-administrative center.PNG>)
 
-### 2. Test an Eight-Character Password
-
-In Active Directory Users and Computers, reset the test user's password using eight characters.
+To prove it worked, I tried to reset a test user's password to something eight characters long.
 
 ![Eight-character password entered](<image/ticket 7/ticket7-set-char-8.PNG>)
 
-The password did not meet the 14-character requirement and was rejected.
+Windows rejected it because it didn't meet the 14-character requirement.
 
 ![Password requirement not met](<image/ticket 7/ticket7-pass-not-met.PNG>)
 
-### 3. Test a 14-Character Password
-
-Reset the password again with 14 characters.
+Then I tried again with 14 characters.
 
 ![14-character password entered](<image/ticket 7/ticket7-set-char-14.PNG>)
 
-The password met the policy requirements and the password reset succeeded.
+This time the reset went through.
 
 ![Password reset successful](<image/ticket 7/ticket7-pass-success.PNG>)
 
+**Result:** Helpdesk accounts now need longer passwords, while everyone else keeps the domain default.
+
+[↑ Back to contents](#quick-navigation)
+
+---
+
 ## Ticket 8: Employee Offboarding
 
-**Problem:** An employee left, and access had to be removed while keeping data for 30 days.
+**The ticket:** An employee had left. HR wanted their access shut off immediately, but their data kept for 30 days in case it was needed.
 
-**Solution:** Disabled the account, reset the password, removed group memberships, recorded the ticket and deletion date in the description, and moved it to the `Disabled Accounts` OU.
+The rule I followed is to disable first and delete later. Deleting an account removes its identity for good, and that is hard to undo if someone asks for the files next week.
 
-**Result:** Sign-in was blocked with the "account has been disabled" message.
+**1. Disable the account.** This is the step that blocks sign-in.
 
-1. Disable the user.
+![Disabling the account](<image/ticket 8/ticket8-dissabled-account.PNG>)
 
-   ![ticket8-dissabled-account.PNG](<image/ticket 8/ticket8-dissabled-account.PNG>)
+**2. Reset the password.** I set a long random one, so even someone who knew the old password could not use it.
 
-2. Reset the user password.
+![Resetting the password](<image/ticket 8/ticket8-reset-pass.PNG>)
 
-   ![ticket8-reset-pass.PNG](<image/ticket 8/ticket8-reset-pass.PNG>)
+**3. Remove the group memberships.** I opened the account and removed the user from their groups. That way, if the account were ever re-enabled by mistake, it would not bring the old access back.
 
-3. Double-click the user and remove them from all groups.
+![Removing group memberships](<image/ticket 8/ticket8-remove-member.PNG>)
 
-   ![ticket8-remove-member.PNG](<image/ticket 8/ticket8-remove-member.PNG>)
+**4. Leave a note.** In the account's description I wrote "Disabled 2026-11-15, Ticket 1008, delete after 2026-12-15", so anyone who found the account later would know why it was there and when to clean it up.
 
-4. In the user's General description, add "Disabled 2026-11-15, Ticket 1008, delete after 2026-12-15".
+![Adding the description](<image/ticket 8/ticket8-add-description.PNG>)
 
-   ![ticket8-add-description.PNG](<image/ticket 8/ticket8-add-description.PNG>)
+**5. Move it out of the way.** I moved the disabled account into the `Disabled Accounts` OU, which keeps leavers apart from active staff and makes the cleanup list easy to find.
 
-5. Move the disabled user from the Users container to the Disabled Accounts OU.
+![Moving the account to the Disabled Accounts OU](<image/ticket 8/ticket8-move-disabled-OU.PNG>)
 
-   ![ticket8-move-disabled-OU.PNG](<image/ticket 8/ticket8-move-disabled-OU.PNG>)
+**6. Test it.** Finally I tried to sign in as the departed user on the client. Windows refused and said the account had been disabled.
 
-6. Sign in as the disabled user and verify that login is blocked.
+![Sign-in blocked for the disabled user](<image/ticket 8/ticket8-log-in.png>)
 
-   ![ticket8-log-in.png](<image/ticket 8/ticket8-log-in.png>)
+**Result:** The user could no longer sign in, and their data stayed in place for the 30-day window.
+
+[↑ Back to contents](#quick-navigation)
+
+---
 
 ## What I Learned
 
 - Group Policy links to OUs, not groups, so where an account lives determines what it receives.
 - Granting access through groups instead of individuals keeps permissions manageable.
+- Changes to a user's groups only take effect after a fresh sign-in.
 - Delegation is safer than adding helpdesk staff to Domain Admins.
 - Disable first and delete later when offboarding.
 - Always verify a fix as the affected user, and document it.
+
+[↑ Back to contents](#quick-navigation)
