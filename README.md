@@ -217,6 +217,11 @@ Restarted the client and signed in again to refresh the session. Lena could then
 
 **Result:** Password resets worked in Sales and were denied in HR, demonstrating least privilege.
 
+1. Right clicked the Sales OU then delegate control then add GG_helpdesk
+   (ticket6-delegate-contorl)
+2. on client windows sign in as local administrator then add RSAT: Active Directory Domain Services and Lightweight Directory Services Tools if none.
+(ticket6-add-active-D)
+
 ## Ticket 7: Stricter Passwords for IT Staff
 
 **Problem:** A security audit required longer passwords for accounts that can reset others.
